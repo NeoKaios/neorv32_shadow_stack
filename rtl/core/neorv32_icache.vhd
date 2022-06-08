@@ -232,7 +232,7 @@ begin
           ctrl.state_nxt <= S_CACHE_MISS;
         end if;
 
-      when S_CACHE_MISS => -- 
+      when S_CACHE_MISS => --
       -- ------------------------------------------------------------
         -- compute block base address --
         ctrl.addr_reg_nxt <= host_addr_i;

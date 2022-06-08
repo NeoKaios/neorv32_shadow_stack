@@ -264,7 +264,7 @@ begin
     neorv32_cpu_cp_fpu_inst: neorv32_cpu_cp_fpu
     port map (
       -- global control --
-      clk_i    => clk_i,        -- global clock, rising edge  
+      clk_i    => clk_i,        -- global clock, rising edge
       rstn_i   => rstn_i,       -- global reset, low-active, async
       ctrl_i   => ctrl_i,       -- main control bus
       start_i  => cp_start(3),  -- trigger operation

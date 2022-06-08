@@ -604,7 +604,7 @@ begin
     begin
       if rising_edge(clk_i) then
         if (tx_engine.state = S_TX_SIM) then -- UART simulation mode
-          
+
           -- print lowest byte as ASCII char --
           char_v := to_integer(unsigned(tx_buffer.rdata(7 downto 0)));
           if (char_v >= 128) then -- out of range?

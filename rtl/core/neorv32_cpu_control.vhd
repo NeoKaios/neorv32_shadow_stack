@@ -434,14 +434,14 @@ begin
                   -- > do not trigger new instruction fetch when a branch instruction is executed
                   (execute_engine.i_reg(instr_opcode_msb_c downto instr_opcode_lsb_c) = opcode_branch_c) or
                   (execute_engine.i_reg(instr_opcode_msb_c downto instr_opcode_lsb_c) = opcode_jal_c) or
-                  (execute_engine.i_reg(instr_opcode_msb_c downto instr_opcode_lsb_c) = opcode_jalr_c) then 
+                  (execute_engine.i_reg(instr_opcode_msb_c downto instr_opcode_lsb_c) = opcode_jalr_c) then
               fetch_engine.state <= S_WAIT;
             else -- request next instruction word
               fetch_engine.state <= S_REQUEST;
             end if;
           end if;
 
-        when S_WAIT => -- wait for free IPB space 
+        when S_WAIT => -- wait for free IPB space
         -- ------------------------------------------------------------
           if (fetch_engine.restart = '1') or (fetch_engine.reset = '1') then -- restart request
             fetch_engine.state <= S_RESTART;
@@ -1014,7 +1014,7 @@ begin
           when opcode_alu_c | opcode_alui_c => -- register/immediate ALU operation
           -- ------------------------------------------------------------
             -- register-immediate ALU operation --
-            if (execute_engine.i_reg(instr_opcode_msb_c-1) = '0') then 
+            if (execute_engine.i_reg(instr_opcode_msb_c-1) = '0') then
               ctrl_nxt(ctrl_alu_opb_mux_c) <= '1'; -- use IMM as ALU.OPB
             end if;
 
@@ -1272,7 +1272,7 @@ begin
            csr_mcycle_c | csr_mcycleh_c | csr_minstret_c | csr_minstreth_c | csr_mcountinhibit_c =>
         -- NOTE: MISA and MTVAL are read-only in the NEORV32 but we do not cause an exception here for compatibility.
         -- Machine-level code should read-back those CSRs after writing them to realize they are read-only.
-        csr_acc_valid <= csr.privilege_eff; -- M-mode only 
+        csr_acc_valid <= csr.privilege_eff; -- M-mode only
 
       -- machine information registers & NEORV32-specific registers, read-only --
       when csr_mvendorid_c | csr_marchid_c | csr_mimpid_c | csr_mhartid_c | csr_mconfigptr_c | csr_mxisa_c =>
@@ -1396,11 +1396,11 @@ begin
       -- ------------------------------------------------------------
         if ((((execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_subadd_c) or (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_sr_c)) and
              (execute_engine.i_reg(instr_funct7_msb_c-2 downto instr_funct7_lsb_c) = "00000") and (execute_engine.i_reg(instr_funct7_msb_c) = '0')) or
-            (((execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_sll_c) or 
-              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_slt_c) or 
-              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_sltu_c) or 
-              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_xor_c) or 
-              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_or_c) or 
+            (((execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_sll_c) or
+              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_slt_c) or
+              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_sltu_c) or
+              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_xor_c) or
+              (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_or_c) or
               (execute_engine.i_reg(instr_funct3_msb_c downto instr_funct3_lsb_c) = funct3_and_c)) and
               (execute_engine.i_reg(instr_funct7_msb_c downto instr_funct7_lsb_c) = "0000000"))) or -- valid base ALU instruction?
            (((CPU_EXTENSION_RISCV_M = true) or (CPU_EXTENSION_RISCV_Zmmul = true)) and (decode_aux.is_m_mul = '1')) or -- valid MUL instruction?
@@ -1542,7 +1542,7 @@ begin
 
         -- exception queue: break point --
         if (CPU_EXTENSION_RISCV_DEBUG = true) then
-          trap_ctrl.exc_buf(exc_break_c) <= (not trap_ctrl.env_start) and (trap_ctrl.exc_buf(exc_break_c) or 
+          trap_ctrl.exc_buf(exc_break_c) <= (not trap_ctrl.env_start) and (trap_ctrl.exc_buf(exc_break_c) or
             (trap_ctrl.break_point and (    csr.privilege) and (not csr.dcsr_ebreakm) and (not debug_ctrl.running)) or -- break to machine-trap-handler when in machine mode on "ebreak"
             (trap_ctrl.break_point and (not csr.privilege) and (not csr.dcsr_ebreaku) and (not debug_ctrl.running))); -- break to machine-trap-handler when in user mode on "ebreak"
         else
@@ -1751,7 +1751,7 @@ begin
 
     end if;
   end process trap_priority;
-  
+
 
 -- ****************************************************************************************************************************
 -- Control and Status Registers (CSRs)
@@ -1935,7 +1935,7 @@ begin
               end loop; -- i (pmpcfg CSR)
             end if;
             -- R/W: pmpaddr* - PMP address registers --
-            if (csr.addr(11 downto 4) = csr_class_pmpaddr_c) then 
+            if (csr.addr(11 downto 4) = csr_class_pmpaddr_c) then
               for i in 0 to PMP_NUM_REGIONS-1 loop
                 if (csr.addr(3 downto 0) = std_ulogic_vector(to_unsigned(i, 4))) and (csr.pmpcfg(i)(7) = '0') then -- unlocked pmpaddr access
                   csr.pmpaddr(i) <= csr.wdata(data_width_c-3 downto index_size_f(PMP_MIN_GRANULARITY)-2);
@@ -2315,9 +2315,9 @@ begin
             if (cpu_cnt_hi_width_c > 0) and (CPU_EXTENSION_RISCV_Zicntr) then csr.rdata(cpu_cnt_hi_width_c-1 downto 0) <= csr.minstreth(cpu_cnt_hi_width_c-1 downto 0); else NULL; end if;
 
           when csr_time_c => -- time (r/-): System time LOW (from MTIME unit)
-            if (CPU_EXTENSION_RISCV_Zicntr) then csr.rdata <= time_i(31 downto 00); else NULL; end if; 
+            if (CPU_EXTENSION_RISCV_Zicntr) then csr.rdata <= time_i(31 downto 00); else NULL; end if;
           when csr_timeh_c => -- timeh (r/-): System time HIGH (from MTIME unit)
-            if (CPU_EXTENSION_RISCV_Zicntr) then csr.rdata <= time_i(63 downto 32); else NULL; end if; 
+            if (CPU_EXTENSION_RISCV_Zicntr) then csr.rdata <= time_i(63 downto 32); else NULL; end if;
 
           -- hardware performance counters --
           -- --------------------------------------------------------------------
@@ -2440,7 +2440,7 @@ begin
 
   -- CSR read data output --
   csr_rdata_o <= csr.rdata;
-  
+
 
 -- ****************************************************************************************************************************
 -- CPU Counters / HPMs

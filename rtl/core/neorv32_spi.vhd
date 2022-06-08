@@ -187,7 +187,7 @@ begin
     end if;
   end process rw_access;
 
-  -- direct chip-select (CS), output is low-active --  
+  -- direct chip-select (CS), output is low-active --
   spi_csn_o(7 downto 0) <= not ctrl(ctrl_cs7_c downto ctrl_cs0_c);
 
   -- trigger new SPI transmission --

@@ -2,7 +2,7 @@
 -- # << NEORV32 - RISC-V-Compatible Debug Module (DM) >>                                           #
 -- # ********************************************************************************************* #
 -- # Compatible to the "Minimal RISC-V External Debug Spec. Version 0.13.2"                        #
--- # -> "Execution-based" debugging scheme                                                         # 
+-- # -> "Execution-based" debugging scheme                                                         #
 -- # ********************************************************************************************* #
 -- # Key features:                                                                                 #
 -- # * register access commands only                                                               #

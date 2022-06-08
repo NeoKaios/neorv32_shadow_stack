@@ -333,7 +333,7 @@ begin
           when S_INIT => -- initialize TX shift engine
           -- ------------------------------------------------------------
             if (tx_buffer.rdata(33) = '0') then -- send data
-              if (tx_buffer.rdata(32) = '0') then -- mode = "RGB" 
+              if (tx_buffer.rdata(32) = '0') then -- mode = "RGB"
                 serial.mode    <= '0';
                 serial.bit_cnt <= "011000"; -- total number of bits to send: 3x8=24
               else -- mode = "RGBW"

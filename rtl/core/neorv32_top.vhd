@@ -377,7 +377,7 @@ begin
   cond_sel_string_f(boolean(XIRQ_NUM_CH > 0), "XIRQ ", "") &
   cond_sel_string_f(IO_GPTMR_EN, "GPTMR ", "") &
   cond_sel_string_f(IO_XIP_EN, "XIP ", "") &
-  "" 
+  ""
   severity note;
 
 

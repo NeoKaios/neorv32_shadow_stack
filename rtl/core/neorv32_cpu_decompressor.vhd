@@ -113,7 +113,7 @@ begin
 
     -- actual decoder --
     case ci_instr16_i(ci_opcode_msb_c downto ci_opcode_lsb_c) is
-    
+
       when "00" => -- C0: Register-Based Loads and Stores
         case ci_instr16_i(ci_funct3_msb_c downto ci_funct3_lsb_c) is
 

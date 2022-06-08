@@ -368,7 +368,7 @@ package neorv32_package is
   constant ctrl_bus_fence_c     : natural := 37; -- executed fence operation
   constant ctrl_bus_fencei_c    : natural := 38; -- executed fence.i operation
   constant ctrl_bus_lock_c      : natural := 39; -- make atomic/exclusive access lock
-  constant ctrl_bus_de_lock_c   : natural := 40; -- remove atomic/exclusive access 
+  constant ctrl_bus_de_lock_c   : natural := 40; -- remove atomic/exclusive access
   constant ctrl_bus_ch_lock_c   : natural := 41; -- evaluate atomic/exclusive lock (SC operation)
   -- instruction word control blocks --
   constant ctrl_ir_funct3_0_c   : natural := 42; -- funct3 bit 0
@@ -2375,7 +2375,7 @@ package body neorv32_package is
       when '0'       => hex_value_v := x"0";
       when '1'       => hex_value_v := x"1";
       when '2'       => hex_value_v := x"2";
-      when '3'       => hex_value_v := x"3"; 
+      when '3'       => hex_value_v := x"3";
       when '4'       => hex_value_v := x"4";
       when '5'       => hex_value_v := x"5";
       when '6'       => hex_value_v := x"6";

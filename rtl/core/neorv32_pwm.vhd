@@ -179,7 +179,7 @@ begin
   begin
     if rising_edge(clk_i) then
       -- pwm base counter --
-      if (enable = '0') then 
+      if (enable = '0') then
         pwm_cnt <= (others => '0');
       elsif (prsc_tick = '1') then
         pwm_cnt <= std_ulogic_vector(unsigned(pwm_cnt) + 1);
