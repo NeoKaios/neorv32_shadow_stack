@@ -164,6 +164,12 @@ architecture neorv32_cpu_rtl of neorv32_cpu is
   signal pmp_addr : pmp_addr_if_t;
   signal pmp_ctrl : pmp_ctrl_if_t;
 
+  -- SHDW
+
+  signal shadow_ok : std_ulogic;
+  signal shadow_rden : std_ulogic;
+  signal shadow_wen : std_ulogic;
+
 begin
 
   -- CPU ISA Configuration ---------------------------------------------------------------------------
@@ -324,7 +330,13 @@ begin
     ma_load_i     => ma_load,       -- misaligned load data address
     ma_store_i    => ma_store,      -- misaligned store data address
     be_load_i     => be_load,       -- bus error on load data access
-    be_store_i    => be_store       -- bus error on store data access
+    be_store_i    => be_store,       -- bus error on store data access
+
+    -- SHDW
+    shadow_ok => shadow_ok, -- input
+    shadow_rden => shadow_rden, -- output
+    shadow_wen => shadow_wen -- output
+
   );
 
   -- CPU state --
@@ -338,6 +350,19 @@ begin
   i_bus_we_o    <= '0'; -- read-only
   i_bus_lock_o  <= '0'; -- instruction fetch cannot be locked
   i_bus_fence_o <= ctrl(ctrl_bus_fencei_c);
+
+
+-- SHDW
+  custom_shadow_stack: neorv32_shadow
+  port map(
+  clk_i => clk_i,        -- i: clock
+  rstn_i => rstn_i,
+  rden_i => shadow_rden,
+  wren_i => shadow_wen,  -- i: writing in mem enable
+  data_store => next_pc, -- i: data to store write enable
+  data_verif => rs1,     -- i: data to check before jump
+  shadow_ok => shadow_ok -- o: 1 if data_verif == stored data
+  );
 
 
   -- Register File --------------------------------------------------------------------------

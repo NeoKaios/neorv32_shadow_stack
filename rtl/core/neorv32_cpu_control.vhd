@@ -132,7 +132,12 @@ entity neorv32_cpu_control is
     ma_load_i     : in  std_ulogic; -- misaligned load data address
     ma_store_i    : in  std_ulogic; -- misaligned store data address
     be_load_i     : in  std_ulogic; -- bus error on load data access
-    be_store_i    : in  std_ulogic  -- bus error on store data access
+    be_store_i    : in  std_ulogic;  -- bus error on store data access
+
+    -- SHDW
+    shadow_ok : in std_ulogic;
+    shadow_rden : out std_ulogic;
+    shadow_wen : out std_ulogic
   );
 end neorv32_cpu_control;
 
@@ -202,7 +207,7 @@ architecture neorv32_cpu_control_rtl of neorv32_cpu_control is
   signal decode_aux : decode_aux_t;
 
   -- instruction execution engine --
-  type execute_engine_state_t is (DISPATCH, TRAP_ENTER, TRAP_EXIT, TRAP_EXECUTE, EXECUTE, ALU_WAIT,
+  type execute_engine_state_t is (DISPATCH, TRAP_ENTER, TRAP_EXIT, TRAP_EXECUTE, EXECUTE, SHDW, ALU_WAIT,
                                   BRANCH, BRANCHED, LOADSTORE_0, LOADSTORE_1, LOADSTORE_2, SYSTEM);
   type execute_engine_t is record
     state        : execute_engine_state_t;
@@ -378,6 +383,9 @@ architecture neorv32_cpu_control_rtl of neorv32_cpu_control is
 
   -- hardware trigger module --
   signal hw_trigger_fire : std_ulogic;
+
+  signal shadow_must_check_return : std_ulogic; -- SHDW
+  signal shadow_wen_nxt : std_ulogic;
 
 begin
 
@@ -695,17 +703,23 @@ begin
       ctrl(ctrl_bus_wr_c)       <= '0';
     elsif rising_edge(clk_i) then
       -- PC update --
+      execute_engine.state      <= execute_engine.state_nxt;
       if (execute_engine.pc_we = '1') then
         if (execute_engine.pc_mux_sel = '0') then
           execute_engine.pc <= execute_engine.next_pc(data_width_c-1 downto 1) & '0'; -- normal (linear) increment OR trap enter/exit
         else
-          execute_engine.pc <= alu_add_i(data_width_c-1 downto 1) & '0'; -- jump/taken_branch
+          if (shadow_must_check_return = '0' or shadow_ok = '1') then -- SHDW
+            execute_engine.pc <= alu_add_i(data_width_c-1 downto 1) & '0'; -- jump/taken_branch
+          else
+            execute_engine.state <= SHDW;
+          end if;
         end if;
       end if;
 
       -- execute engine arbiter --
-      execute_engine.state      <= execute_engine.state_nxt;
+      -- execute_engine.state      <= execute_engine.state_nxt;
       execute_engine.state_prev <= execute_engine.state;
+      shadow_wen <= shadow_wen_nxt; --SHDW
       execute_engine.branched   <= execute_engine.branched_nxt;
       execute_engine.i_reg      <= execute_engine.i_reg_nxt;
       execute_engine.is_ci      <= execute_engine.is_ci_nxt;
@@ -963,7 +977,7 @@ begin
         execute_engine.i_reg_nxt  <= issue_engine.data(31 downto 0);
         execute_engine.is_ci_nxt  <= issue_engine.data(32); -- this is a de-compressed instruction
         execute_engine.is_ici_nxt <= issue_engine.data(35); -- illegal compressed instruction
-        --
+        --ctrl_rf_wb_en_c
         if (issue_engine.valid(0) = '1') or (issue_engine.valid(1) = '1') then -- instruction available?
           -- PC update --
           execute_engine.branched_nxt <= '0';
@@ -1081,6 +1095,16 @@ begin
 
           when opcode_branch_c | opcode_jal_c | opcode_jalr_c => -- branch / jump and link (with register)
           -- ------------------------------------------------------------
+            -- SHDW
+            -- its a jal(r) and rd = x0, it's a func call
+            if(execute_engine.i_reg(instr_opcode_lsb_c + 2) = '1' and execute_engine.i_reg(instr_rd_msb_c downto instr_rd_lsb_c) ="00001") then
+              shadow_wen_nxt <= '1';
+            end if;
+            -- is jalr and rs1 = ra and rd = x0, it's a function return
+            if(execute_engine.i_reg(instr_opcode_lsb_c + 3) = '0' and  execute_engine.i_reg(instr_rd_msb_c downto instr_rd_lsb_c) = "00000" and execute_engine.i_reg(instr_rs1_msb_c downto instr_rs1_lsb_c) = "00001") then
+              shadow_must_check_return <= '1';
+            end if;
+
             if (execute_engine.i_reg(instr_opcode_lsb_c+3 downto instr_opcode_lsb_c+2) = opcode_jalr_c(3 downto 2)) then -- JALR
               ctrl_nxt(ctrl_alu_opa_mux_c) <= '0'; -- use RS1 as ALU.OPA (branch target address base)
             else -- JAL
@@ -1172,6 +1196,8 @@ begin
       when BRANCH => -- update PC on taken branches and jumps
       -- ------------------------------------------------------------
         -- get and store return address (only relevant for jump-and-link operations) --
+        shadow_wen_nxt <= '0';
+
         ctrl_nxt(ctrl_rf_mux1_c downto ctrl_rf_mux0_c) <= rf_mux_npc_c; -- next PC
         ctrl_nxt(ctrl_rf_wb_en_c) <= execute_engine.i_reg(instr_opcode_lsb_c+2); -- valid RF write-back? (is jump-and-link?)
         -- destination address --
@@ -1179,14 +1205,27 @@ begin
         execute_engine.pc_we      <= '1'; -- update PC with destination; will be overridden again in DISPATCH if branch not taken
         if (execute_engine.i_reg(instr_opcode_lsb_c+2) = '1') or (execute_engine.branch_taken = '1') then -- JAL/JALR or taken branch
           fetch_engine.reset       <= '1'; -- reset instruction fetch starting at modified PC
+          if(shadow_must_check_return = '1') then
+            shadow_rden <= '1';
+          end if;
+          --   execute_engine.pc_we <= '0';
+          --   fetch_engine.reset <= '0';
+          --   execute_engine.state_nxt <= SHDW;
+          -- else
           execute_engine.state_nxt <= BRANCHED;
         else
           execute_engine.state_nxt <= DISPATCH;
         end if;
 
+      when SHDW =>
+        execute_engine.state_nxt <= SHDW;
 
       when BRANCHED => -- delay cycle to wait for reset of pipeline front-end
       -- ------------------------------------------------------------
+        -- SHDW
+        shadow_must_check_return <= '0';
+        shadow_rden <= '0';
+
         execute_engine.branched_nxt <= '1'; -- this is an actual branch
         execute_engine.state_nxt    <= DISPATCH;
         -- use this state also to (re-)initialize the register file's x0/zero register --

@@ -1267,8 +1267,26 @@ package neorv32_package is
       ma_load_i     : in  std_ulogic; -- misaligned load data address
       ma_store_i    : in  std_ulogic; -- misaligned store data address
       be_load_i     : in  std_ulogic; -- bus error on load data access
-      be_store_i    : in  std_ulogic  -- bus error on store data access
+      be_store_i    : in  std_ulogic;  -- bus error on store data access
+
+      -- SHDW
+      shadow_ok     : in  std_ulogic;
+      shadow_rden   : out std_ulogic;
+      shadow_wen    : out std_ulogic
     );
+  end component;
+
+  -- SHDW : Shadow stack
+  component neorv32_shadow
+  port(
+    clk_i      : in  std_ulogic; -- global clock line
+    wren_i     : in  std_ulogic; -- write enable
+    rden_i     : in  std_ulogic;
+    rstn_i     : in  std_ulogic; -- global reset, low-active, async
+    data_store : in  std_ulogic_vector(31 downto 0); -- data in
+    data_verif : in  std_ulogic_vector(31 downto 0); -- data in
+    shadow_ok  : out std_ulogic -- transfer acknowledge
+  );
   end component;
 
   -- Component: CPU Register File -----------------------------------------------------------
