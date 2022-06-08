@@ -1,8 +1,10 @@
 Hex code to break prog w/ buffer overflow
+6 words of random data and the address of the success method, this string need to end with '0d' = '\n' character.
 416E206F
 6C642073
 696C656E
 7420706F
 6E642E2E
 2E20412D
-e00100002d0d
+e0010000
+0d

@@ -44,33 +44,20 @@ void auth(char *password)
 
 void attack()
 {
-
     neorv32_uart0_print("in attack\n");
     char rac[8];
+    uintptr_t ra = (uintptr_t)success;
+    for (size_t i = 0; i < 8; i++)
+    {
+        rac[i] = (ra >> (8 * i)) & 0xff;
+        neorv32_uart0_printf("%d\n", rac[i]);
+    }
 
-
-        uintptr_t ra = (uintptr_t)success;
-        for (size_t i = 0; i < 8; i++)
-        {
-            rac[i] = (ra >> (8 * i)) & 0xff;
-            neorv32_uart0_printf("%d\n", rac[i]);
-        }
-
-
-    // asm volatile("mv x1, %0" : "=rm" (ravar));
     // char password[80] = "An old silent pond... A frog jumps into the pond, splash! Silence again.12345678";
     char password[40] = "An old silent pond... A-12345678--\n";
     strcpy(password + 24, rac);
     neorv32_uart0_printf("%d\n%s\n", ra, password);
-
-    // auth(password);
 }
-// void other()
-// {
-//     neorv32_uart0_print("\nin other\n");
-//     attack();
-//     neorv32_uart0_print("\nout other\n");
-// }
 
 int main(int argc, char *argv[])
 {
@@ -82,25 +69,14 @@ int main(int argc, char *argv[])
     // check available hardware extensions and compare with compiler flags
     neorv32_rte_check_isa(0); // silent = 0 -> show message if isa mismatch
 
-    // neorv32_uart0_print("Send 'a' in order to attack, anything else to authentificate\n");
-    // char c = neorv32_uart0_getc();
-    // if (c == 'a')
-    // {
     attack();
 
-    // other();
-    // attack();
-    // }
-    // else
-    // {
     neorv32_uart0_print("\nEnter password\n");
     char buf[50];
     neorv32_uart0_scan(buf, 50, 1);
-    // strcpy(buf,"p@ssw0rd");
-    neorv32_uart0_print("\n");
-    neorv32_uart0_print("Before auth\n");
+    neorv32_uart0_print("\nBefore auth\n");
     auth(buf);
-    // }
+
     neorv32_uart0_print("Goodbye\n");
     return 0;
 }

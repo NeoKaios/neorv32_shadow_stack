@@ -7,41 +7,30 @@ library neorv32;
 use neorv32.neorv32_package.all;
 
 entity neorv32_shadow is
-  -- generic (
-  --   DMEM_BASE : std_ulogic_vector(31 downto 0); -- memory base address
-  --   DMEM_SIZE : natural -- processor-internal instruction memory size in bytes
-  -- );
   port (
     clk_i  : in  std_ulogic; -- global clock line
     rstn_i        : in  std_ulogic; -- global reset, low-active, async
     rden_i : in  std_ulogic; -- read enable
     wren_i : in  std_ulogic; -- write enable
-    -- ben_i  : in  std_ulogic_vector(03 downto 0); -- byte write enable
-    -- addr_i : in  std_ulogic_vector(31 downto 0); -- address
     data_store : in  std_ulogic_vector(31 downto 0); -- data in
     data_verif : in  std_ulogic_vector(31 downto 0); -- data in
-    -- data_o : out std_ulogic_vector(31 downto 0); -- data out
-    -- ack_o  : out std_ulogic -- transfer acknowledge
     shadow_ok  : out std_ulogic -- transfer acknowledge
   );
 end neorv32_shadow;
 
 architecture neorv32_shadow_rtl of neorv32_shadow is
-
-
 --stack
   signal mem_top_stack : mem8_t (0 to 0);
   signal mem_ra_stack : mem32_t(0 to 255);
 
 --read data
   signal shadow_rd : std_ulogic;
-
 begin
 
   --mem_top_stack(0) <= x"00";
 
   -- Memory Access --------------------------------------------------------------------------
-  -- -------------------------------------------------------------------------------------------
+  -- ----------------------------------------------------------------------------------------
   shadow_write: process(clk_i)
   begin
     if(rstn_i = '0') then

@@ -1096,7 +1096,7 @@ begin
           when opcode_branch_c | opcode_jal_c | opcode_jalr_c => -- branch / jump and link (with register)
           -- ------------------------------------------------------------
             -- SHDW
-            -- its a jal(r) and rd = x0, it's a func call
+            -- its a jal(r) and rd = x1, it's a func call
             if(execute_engine.i_reg(instr_opcode_lsb_c + 2) = '1' and execute_engine.i_reg(instr_rd_msb_c downto instr_rd_lsb_c) ="00001") then
               shadow_wen_nxt <= '1';
             end if;
@@ -1205,13 +1205,9 @@ begin
         execute_engine.pc_we      <= '1'; -- update PC with destination; will be overridden again in DISPATCH if branch not taken
         if (execute_engine.i_reg(instr_opcode_lsb_c+2) = '1') or (execute_engine.branch_taken = '1') then -- JAL/JALR or taken branch
           fetch_engine.reset       <= '1'; -- reset instruction fetch starting at modified PC
-          if(shadow_must_check_return = '1') then
+          if(shadow_must_check_return = '1') then --SHDW
             shadow_rden <= '1';
           end if;
-          --   execute_engine.pc_we <= '0';
-          --   fetch_engine.reset <= '0';
-          --   execute_engine.state_nxt <= SHDW;
-          -- else
           execute_engine.state_nxt <= BRANCHED;
         else
           execute_engine.state_nxt <= DISPATCH;
