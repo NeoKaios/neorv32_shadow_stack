@@ -480,14 +480,23 @@ Finally, once the bootloader is working, we could test the attack and see if the
 ### Bibliography and links
 
 LiteX repository: https://github.com/enjoy-digital/litex
+
 Vivado Download: https://www.xilinx.com/support/download.html
+
 Rocket Chip Generator repository: https://github.com/chipsalliance/rocket-chip
+
 NEORV32 Datasheet: https://stnolting.github.io/neorv32/
+
 NEORV32 User Guide: https://stnolting.github.io/neorv32/ug/
+
 NEORV32-setup repository: https://github.com/stnolting/neorv32-setups
+
 NEORV32 repository: https://github.com/stnolting/neorv32
+
 [1] https://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch30lev1sec6.html#ch30fig08
+
 [2] https://beta.hackndo.com/technique-du-canari-bypass/
+
 [3] https://www.phoronix.com/scan.php?page=news_item&px=Shadow-Stacks-Linux-AMD
 
 Our repository: https://github.com/NeoKaios/neorv32_shadow_stack
